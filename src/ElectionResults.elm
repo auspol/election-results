@@ -4,6 +4,9 @@ import String
 import Http
 import Json.Decode as Json exposing ((:=))
 import Task exposing (Task)
+
+import Html exposing (Html)
+import Html.Attributes exposing (style)
 import Graphics.Element exposing (show)
 
 
@@ -11,7 +14,63 @@ import Graphics.Element exposing (show)
 apiUrl = "https://api.morph.io/kennib/australian_electoral_commission_federal_election_data/data.json"
 
 -- Show results
-main = Signal.map show results.signal
+main = Signal.map view results.signal
+
+
+-- Display the election results
+view : Result String (List ElectionResult) -> Html
+view result =
+    case result of
+        Err error -> Html.div [] [ Html.text error ]
+        Ok electionResults -> electionBarCharts electionResults
+
+-- HTML Bar charts
+electionBarCharts : List ElectionResult -> Html
+electionBarCharts electionResults =
+    let
+        fraction votes election = toFloat (votes election) / toFloat (totalVotes election)
+        totalVotes election = election.incumbentVotes + election.challengingVotes
+        uncountedVotes election = election.enrolments - totalVotes election
+
+        incumbent election = [ (election.incumbent, fraction .incumbentVotes election) ]
+        challenging election = [ (election.challenging, fraction .challengingVotes election) ]
+        uncounted election = [ ("", fraction uncountedVotes election) ]
+    in
+        Html.div []
+        <| List.map
+            (\election -> Html.div []
+                [ Html.p [] [ Html.text election.electorate ]
+                , barChart <| incumbent election ++ challenging election
+                ]
+            )
+            electionResults
+
+barChart : List (String, Float) -> Html
+barChart data =
+    let
+        bar align label width = Html.div
+            [ style
+                [ ("text-align", align)
+                , ("height", "40px")
+                , ("flex", toString width)
+                , ("border", "1px solid #333")
+                ]
+            ]
+            [ Html.text label ]
+        firstBar = Maybe.withDefault [] <| Maybe.map (\first -> [(uncurry <| bar "left") first]) <| List.head data
+        restBars = Maybe.withDefault [] <| Maybe.map bars <| List.tail data
+        bars data = case data of
+           [] -> []
+           [(label, width)] -> [bar "right" label width]
+           (label,width)::rest -> bar "center" label width :: bars rest
+    in
+        Html.div
+            [ style
+                [ ("margin", "5px 10px 20px 10px")
+                , ("display", "flex")
+                ]
+            ]
+            <| firstBar ++ restBars
 
 -- Task for fetching 2013 results
 fetchElection2013Results : Task Http.Error (List ElectionResult)
