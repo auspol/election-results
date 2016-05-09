@@ -36,10 +36,26 @@ electionBarCharts electionResults =
         challenging election = [ (election.challenging, election.challengingParty, fraction .challengingVotes election) ]
         uncounted election = [ ("", "", fraction uncountedVotes election) ]
     in
-        Html.div []
+        Html.div
+            [ style
+                [ ("display", "flex")
+                , ("flex-wrap", "wrap")
+                ]
+            ]
         <| List.map
-            (\election -> Html.div []
-                [ Html.p [] [ Html.text election.electorate ]
+            (\election -> Html.div
+                [ style
+                    [ ("flex", "280px 0 0") ]
+                ]
+                [ Html.p
+                    [ style
+                        [ ("text-align", "center")
+                        , ("font-size", "10px")
+                        , ("margin", "0px")
+                        , ("display", "none")
+                        ]
+                    ]
+                    [ Html.text election.electorate ]
                 , barChart (incumbent election ++ challenging election) partyColour
                 ]
             )
@@ -51,7 +67,9 @@ barChart data colour =
         bar align label category width = Html.div
             [ style
                 [ ("text-align", align)
-                , ("padding", "15px")
+                , ("font-size", "11px")
+                , ("white-space", "nowrap")
+                , ("padding", "5px")
                 , ("flex", toString width)
                 , ("background", colour category)
                 , ("color", "white")
@@ -67,7 +85,7 @@ barChart data colour =
     in
         Html.div
             [ style
-                [ ("margin", "5px 10px 20px 10px")
+                [ ("margin", "1px")
                 , ("display", "flex")
                 ]
             ]
