@@ -30,13 +30,12 @@ view result =
 electionBarCharts : List ElectionResult -> Html
 electionBarCharts electionResults =
     let
-        fraction votes election = toFloat (votes election) / toFloat (totalVotes election)
-        totalVotes election = election.incumbentVotes + election.challengingVotes
+        fraction votes election = toFloat votes / toFloat (totalVotes election)
+        totalVotes election = election.incumbent.votes + election.challenging.votes
         uncountedVotes election = election.enrolments - totalVotes election
 
-        incumbent election = [ (election.incumbent, election.incumbentParty, fraction .incumbentVotes election) ]
-        challenging election = [ (election.challenging, election.challengingParty, fraction .challengingVotes election) ]
-        uncounted election = [ ("", "", fraction uncountedVotes election) ]
+        result candidate election = [ (candidate.name, candidate.party, fraction candidate.votes election) ]
+        uncounted election = [ ("", "", fraction (uncountedVotes election) election) ]
     in
         Html.div
             [ style
@@ -57,7 +56,7 @@ electionBarCharts electionResults =
                         ]
                     ]
                     [ Html.text election.electorate ]
-                , barChart (incumbent election ++ challenging election) partyColour
+                , barChart (result election.incumbent election ++ result election.challenging election) partyColour
                 ]
             )
             electionResults

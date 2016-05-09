@@ -45,35 +45,41 @@ crossOriginGet decoder url =
 -- SQL query for elections data
 electionQuery : String -> String -> String
 electionQuery event election =
-    """select contest.name as electorate, contest.enrolment as enrolments,
-        incumbent_candidate.name as incumbent, incumbent_party.name as incumbent_party, incumbent.votes as incumbent_votes,
-        challenging_candidate.name as challenging, challenging_party.name as challenging_party, challenging.votes as challenging_votes
-    from event
-    join election
-        on election.event_id = event.id
-    join contest
-        on contest.election_id = election.id
-        and contest.event_id = event.id
-    join two_candidate_preferred as incumbent
-        on incumbent.contest_id = contest.id
-        and incumbent.election_id = election.id
-        and incumbent.event_id = event.id
-        and incumbent.incumbent = 1
-    join two_candidate_preferred as challenging
-        on challenging.contest_id = contest.id
-        and challenging.election_id = election.id
-        and challenging.event_id = event.id
-        and challenging.incumbent = 0
-    join candidate as incumbent_candidate
-        on incumbent_candidate.id = incumbent.candidate_id
-    join candidate as challenging_candidate
-        on challenging_candidate.id = challenging.candidate_id
-    join party as incumbent_party
-        on incumbent_party.id = incumbent.party_id
-    join party as challenging_party
-        on challenging_party.id = challenging.party_id
-    where event.id = '""" ++ event ++ """'
-        and election.id = '""" ++ election ++ """'
-    group by contest.id
-    order by contest.name
-    """
+ """select
+  contest.name as electorate, contest.enrolment as enrolments,
+  incumbent_candidate.name as incumbent,
+  incumbent_party.name as incumbent_party,
+  incumbent.votes as incumbent_votes,
+  incumbent.elected as incumbent_elected,
+  challenging_candidate.name as challenging,
+  challenging_party.name as challenging_party,
+  challenging.votes as challenging_votes,
+  challenging.elected as challenging_elected
+ from event
+ join election
+  on election.event_id = event.id
+ join contest
+  on contest.election_id = election.id
+  and contest.event_id = event.id
+ join two_candidate_preferred as incumbent
+  on incumbent.contest_id = contest.id
+  and incumbent.election_id = election.id
+  and incumbent.event_id = event.id
+  and incumbent.incumbent = 1
+ join two_candidate_preferred as challenging
+  on challenging.contest_id = contest.id
+  and challenging.election_id = election.id
+  and challenging.event_id = event.id
+  and challenging.incumbent = 0
+ join candidate as incumbent_candidate
+  on incumbent_candidate.id = incumbent.candidate_id
+ join candidate as challenging_candidate
+  on challenging_candidate.id = challenging.candidate_id
+ join party as incumbent_party
+  on incumbent_party.id = incumbent.party_id
+ join party as challenging_party
+  on challenging_party.id = challenging.party_id
+ where event.id = '""" ++ event ++ """'
+  and election.id = '""" ++ election ++ """'
+ group by contest.id
+ order by contest.name"""

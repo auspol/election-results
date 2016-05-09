@@ -1,44 +1,55 @@
 module ElectionResults.Data
     ( ElectionResult
+    , Candidate
     , electionResults
     , electionResult
+    , candidateResult
     ) where
 
 import Json.Decode as Json exposing ((:=))
 
--- JSON election result data
+-- Election Result data types
 type alias ElectionResult =
     { electorate : String
-    , incumbent : String
-    , challenging : String
-    , incumbentParty : String
-    , challengingParty : String
-    , enrolments : Int
-    , incumbentVotes : Int
-    , challengingVotes : Int
+    , incumbent : Candidate
+    , challenging : Candidate
     }
 
+type alias Candidate =
+    { name : String
+    , party : String
+    , incumbent : Bool
+    , elected : Bool
+    , votes : Int
+    }
+
+-- JSON election result data
 electionResults : Json.Decoder (List ElectionResult)
 electionResults = Json.list electionResult
 
 electionResult : Json.Decoder ElectionResult
 electionResult =
-    Json.object8
-        (\electorate incumbent challenging incumbentParty challengingParty enrolments incumbentVotes challengingVotes ->
+    Json.object3
+        (\electorate incumbent challenging ->
             { electorate = electorate
             , incumbent = incumbent
             , challenging = challenging
-            , incumbentParty = incumbentParty
-            , challengingParty = challengingParty
-            , enrolments = enrolments
-            , incumbentVotes = incumbentVotes
-            , challengingVotes = challengingVotes
             })
         ("electorate"        := Json.string)
-        ("incumbent"         := Json.string)
-        ("challenging"       := Json.string)
-        ("incumbent_party"    := Json.string)
-        ("challenging_party"  := Json.string)
-        ("enrolments"        := Json.int)
-        ("incumbent_votes"   := Json.int)
-        ("challenging_votes" := Json.int)
+        (candidateResult "incumbent")
+        (candidateResult "challenging")
+
+candidateResult : String -> Json.Decoder Candidate
+candidateResult kind =
+    Json.object4
+        (\name party elected votes ->
+            { name = name
+            , party = party
+            , incumbent = kind == "incumbent"
+            , elected = elected
+            , votes = votes
+            })
+    ((kind)      := Json.string)
+    ((kind++"_party")     := Json.string)
+    ((kind++"_elected")   := Json.bool)
+    ((kind++"_votes")     := Json.int)
