@@ -43,7 +43,12 @@ electionResults title condition results =
             [] -> Html.text ""
             filteredResults ->
                 Html.div []
-                [ Html.h2 [] [ Html.text title ]
+                [ Html.h2 []
+                    [ Html.text title
+                    , Html.text " ("
+                    , Html.text <| toString <| List.length filteredResults
+                    , Html.text ")"
+                    ]
                 , electionBarCharts filteredResults
                 ]
 
