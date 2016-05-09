@@ -6,7 +6,7 @@ import Json.Decode as Json exposing ((:=))
 import Task exposing (Task)
 
 import Html exposing (Html)
-import Html.Attributes exposing (style)
+import Html.Attributes as Attr exposing (style, class)
 import Graphics.Element exposing (show)
 
 
@@ -20,9 +20,13 @@ main = Signal.map view results.signal
 -- Display the election results
 view : Result String (List ElectionResult) -> Html
 view result =
-    case result of
-        Err error -> Html.div [] [ Html.text error ]
+    Html.div []
+    [ Html.node "meta" [Attr.name "viewport", Attr.content "width=device-width"] []
+    , Html.node "link" [Attr.rel "stylesheet", Attr.href "/css/main.css"] []
+    , case result of
+        Err error -> Html.p [] [Html.text error]
         Ok electionResults -> electionBarCharts electionResults
+    ]
 
 -- HTML Bar charts
 electionBarCharts : List ElectionResult -> Html
@@ -44,8 +48,7 @@ electionBarCharts electionResults =
             ]
         <| List.map
             (\election -> Html.div
-                [ style
-                    [ ("flex", "280px 0 0") ]
+                [ class "election-result"
                 ]
                 [ Html.p
                     [ style
