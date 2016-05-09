@@ -32,37 +32,38 @@ electionBarCharts electionResults =
         totalVotes election = election.incumbentVotes + election.challengingVotes
         uncountedVotes election = election.enrolments - totalVotes election
 
-        incumbent election = [ (election.incumbent, fraction .incumbentVotes election) ]
-        challenging election = [ (election.challenging, fraction .challengingVotes election) ]
-        uncounted election = [ ("", fraction uncountedVotes election) ]
+        incumbent election = [ (election.incumbent, election.incumbentParty, fraction .incumbentVotes election) ]
+        challenging election = [ (election.challenging, election.challengingParty, fraction .challengingVotes election) ]
+        uncounted election = [ ("", "", fraction uncountedVotes election) ]
     in
         Html.div []
         <| List.map
             (\election -> Html.div []
                 [ Html.p [] [ Html.text election.electorate ]
-                , barChart <| incumbent election ++ challenging election
+                , barChart (incumbent election ++ challenging election) partyColour
                 ]
             )
             electionResults
 
-barChart : List (String, Float) -> Html
-barChart data =
+barChart : List (String, String, Float) -> (String -> String) -> Html
+barChart data colour =
     let
-        bar align label width = Html.div
+        bar align label category width = Html.div
             [ style
                 [ ("text-align", align)
                 , ("height", "40px")
                 , ("flex", toString width)
-                , ("border", "1px solid #333")
+                , ("background", colour category)
+                , ("color", "white")
                 ]
             ]
             [ Html.text label ]
-        firstBar = Maybe.withDefault [] <| Maybe.map (\first -> [(uncurry <| bar "left") first]) <| List.head data
+        firstBar = Maybe.withDefault [] <| Maybe.map (\(label, category, width) -> [bar "left" label category width]) <| List.head data
         restBars = Maybe.withDefault [] <| Maybe.map bars <| List.tail data
         bars data = case data of
            [] -> []
-           [(label, width)] -> [bar "right" label width]
-           (label,width)::rest -> bar "center" label width :: bars rest
+           [(label, category, width)] -> [bar "right" label category width]
+           (label, category, width)::rest -> bar "center" label category width :: bars rest
     in
         Html.div
             [ style
@@ -71,6 +72,24 @@ barChart data =
                 ]
             ]
             <| firstBar ++ restBars
+
+-- Party colours
+partyColour : String -> String
+partyColour party =
+    if String.contains "Labor" party then
+        "#cc2222"
+    else if String.contains "Liberal" party then
+        "#2222cc"
+    else if String.contains "National" party then
+        "#6666ee"
+    else if String.contains "Green" party then
+        "#22cc22"
+    else if String.contains "Palmer" party then
+        "#cccc22"
+    else if String.contains "Katter" party then
+        "#aa6622"
+    else
+        "#ccc"
 
 -- Task for fetching 2013 results
 fetchElection2013Results : Task Http.Error (List ElectionResult)
@@ -120,8 +139,8 @@ crossOriginGet decoder url =
 electionQuery : String -> String -> String
 electionQuery event election =
     """select contest.name as electorate, contest.enrolment as enrolments,
-        incumbent_candidate.name as incumbent, incumbent.votes as incumbent_votes,
-        challenging_candidate.name as challenging, challenging.votes as challenging_votes
+        incumbent_candidate.name as incumbent, incumbent_party.name as incumbent_party, incumbent.votes as incumbent_votes,
+        challenging_candidate.name as challenging, challenging_party.name as challenging_party, challenging.votes as challenging_votes
     from event
     join election
         on election.event_id = event.id
@@ -138,6 +157,10 @@ electionQuery event election =
         on incumbent_candidate.id = incumbent.candidate_id
     join candidate as challenging_candidate
         on challenging_candidate.id = challenging.candidate_id
+    join party as incumbent_party
+        on incumbent_party.id = incumbent.party_id
+    join party as challenging_party
+        on challenging_party.id = challenging.party_id
     where event.id = '""" ++ event ++ """'
         and election.id = '""" ++ election ++ """'
     group by contest.id
@@ -149,6 +172,8 @@ type alias ElectionResult =
     { electorate : String
     , incumbent : String
     , challenging : String
+    , incumbentParty : String
+    , challengingParty : String
     , enrolments : Int
     , incumbentVotes : Int
     , challengingVotes : Int
@@ -159,11 +184,13 @@ electionResults = Json.list electionResult
 
 electionResult : Json.Decoder ElectionResult
 electionResult =
-    Json.object6
-        (\electorate incumbent challenging enrolments incumbentVotes challengingVotes ->
+    Json.object8
+        (\electorate incumbent challenging incumbentParty challengingParty enrolments incumbentVotes challengingVotes ->
             { electorate = electorate
             , incumbent = incumbent
             , challenging = challenging
+            , incumbentParty = incumbentParty
+            , challengingParty = challengingParty
             , enrolments = enrolments
             , incumbentVotes = incumbentVotes
             , challengingVotes = challengingVotes
@@ -171,6 +198,8 @@ electionResult =
         ("electorate"        := Json.string)
         ("incumbent"         := Json.string)
         ("challenging"       := Json.string)
+        ("incumbent_party"    := Json.string)
+        ("challenging_party"  := Json.string)
         ("enrolments"        := Json.int)
         ("incumbent_votes"   := Json.int)
         ("challenging_votes" := Json.int)
