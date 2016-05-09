@@ -23,8 +23,29 @@ view result =
     , Html.node "link" [Attr.rel "stylesheet", Attr.href "/css/main.css"] []
     , case result of
         Err error -> Html.p [] [Html.text error]
-        Ok electionResults -> electionBarCharts electionResults
+        Ok results ->
+            Html.div []
+            [ electionResults "Coalition" (\result -> isElected Liberal result || isElected National result) results
+            , electionResults "Labor" (isElected Labor) results
+            , electionResults "Greens" (isElected Greens) results
+            , electionResults "Other" (isElected Other) results
+            , electionResults "Undecided" isUndecided results
+            ]
     ]
+
+-- Results filtered by category
+electionResults : String -> (ElectionResult -> Bool) -> List ElectionResult -> Html
+electionResults title condition results =
+    let
+        filteredResults = List.filter condition results
+    in
+        case filteredResults of
+            [] -> Html.text ""
+            filteredResults ->
+                Html.div []
+                [ Html.h2 [] [ Html.text title ]
+                , electionBarCharts filteredResults
+                ]
 
 -- Bar charts for each electorate
 electionBarCharts : List ElectionResult -> Html
