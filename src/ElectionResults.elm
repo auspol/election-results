@@ -149,9 +149,13 @@ electionQuery event election =
         and contest.event_id = event.id
     join two_candidate_preferred as incumbent
         on incumbent.contest_id = contest.id
+        and incumbent.election_id = election.id
+        and incumbent.event_id = event.id
         and incumbent.incumbent = 1
     join two_candidate_preferred as challenging
         on challenging.contest_id = contest.id
+        and challenging.election_id = election.id
+        and challenging.event_id = event.id
         and challenging.incumbent = 0
     join candidate as incumbent_candidate
         on incumbent_candidate.id = incumbent.candidate_id
