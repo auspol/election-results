@@ -1,6 +1,5 @@
 module ElectionResults where
 
-import String
 import Http
 import Json.Decode as Json
 import Task exposing (Task)
@@ -9,6 +8,7 @@ import Html exposing (Html)
 import Html.Attributes as Attr exposing (style, class)
 
 import ElectionResults.Data exposing (..)
+import ElectionResults.Parties exposing (..)
 import ElectionResults.API exposing (..)
 import ElectionResults.Charts exposing (barChart)
 
@@ -56,28 +56,12 @@ electionBarCharts electionResults =
                         ]
                     ]
                     [ Html.text election.electorate ]
-                , barChart (result election.incumbent election ++ result election.challenging election) partyColour
+                , barChart
+                    (result election.incumbent election ++ result election.challenging election)
+                    (partyType >> partyColour)
                 ]
             )
             electionResults
-
--- Party colours
-partyColour : String -> String
-partyColour party =
-    if String.contains "Labor" party then
-        "#cc2222"
-    else if String.contains "Liberal" party then
-        "#2222cc"
-    else if String.contains "National" party then
-        "#6666ee"
-    else if String.contains "Green" party then
-        "#22cc22"
-    else if String.contains "Palmer" party then
-        "#cccc22"
-    else if String.contains "Katter" party then
-        "#aa6622"
-    else
-        "#ccc"
 
 -- Task for fetching 2013 results
 fetchElection2013Results : Task Http.Error (List ElectionResult)
