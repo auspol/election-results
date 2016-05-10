@@ -12,9 +12,9 @@ barChart data colour =
         bar align label category width = Html.div
             [ style
                 [ ("text-align", align)
-                , ("font-size", "11px")
+                , ("font-size", "9.2px")
                 , ("white-space", "nowrap")
-                , ("padding", "5px")
+                , ("padding", "2px")
                 , ("flex", toString width)
                 , ("background", colour category)
                 , ("color", "white")
@@ -30,7 +30,7 @@ barChart data colour =
                 , ("margin-left", "-1px")
                 , ("border-left", "2px solid transparent")
                 , ("border-right", "2px solid transparent")
-                , ("border-"++side, "10px solid white")
+                , ("border-"++side, "5px solid white")
                 ]
             ]
             []

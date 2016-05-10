@@ -1,10 +1,13 @@
 .categories {
-
 }
 
 .category {
-
 }
+
+    .category h2 {
+        margin: 0px;
+        margin-bottom: 10px;
+    }
 
 .election-results {
     display: flex;
@@ -24,7 +27,21 @@
 }
 
 @media screen and (min-width: 480px) {
+    .categories {
+        display: flex;
+        height: 100vh;
+    }
+
+    .category {
+        flex: 200px 1 0;
+    }
+
+        .category.coalition,
+        .category.labor {
+            flex: 200px 2 0;
+        }
+
     .election-result {
-        flex: 280px 0 0;
+        flex: 200px 0 0;
     }
 }

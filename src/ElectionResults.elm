@@ -1,5 +1,6 @@
 module ElectionResults where
 
+import String
 import Http
 import Json.Decode as Json
 import Task exposing (Task)
@@ -57,7 +58,7 @@ electionResults title color condition results =
         case filteredResults of
             [] -> Html.text ""
             filteredResults ->
-                Html.div [ class "category" ]
+                Html.div [ class <| "category " ++ String.toLower title ]
                 [ Html.h2
                     [ style
                         [ ("color", color)
