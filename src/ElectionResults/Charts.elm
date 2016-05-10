@@ -21,6 +21,19 @@ barChart data colour =
                 ]
             ]
             [ Html.text label ]
+        fiftyPercent side = Html.span
+            [ style
+                [ ("display", "inline-block")
+                , ("position", "absolute")
+                , ("left", "50%")
+                , (side, "0px")
+                , ("margin-left", "-1px")
+                , ("border-left", "2px solid transparent")
+                , ("border-right", "2px solid transparent")
+                , ("border-"++side, "10px solid white")
+                ]
+            ]
+            []
         firstBar = Maybe.withDefault [] <| Maybe.map (\(label, category, width) -> [bar "left" label category width]) <| List.head data
         restBars = Maybe.withDefault [] <| Maybe.map bars <| List.tail data
         bars data = case data of
@@ -32,8 +45,11 @@ barChart data colour =
             [ style
                 [ ("margin", "1px")
                 , ("display", "flex")
+                , ("position", "relative")
                 ]
             ]
-            <| firstBar ++ restBars
+            <| [fiftyPercent "top", fiftyPercent "bottom"]
+            ++ firstBar
+            ++ restBars
 
 
