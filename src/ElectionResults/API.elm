@@ -23,7 +23,7 @@ queryString : List (String, String) -> String
 queryString data =
     (++) "?"
     <| String.join "&"
-    <| List.map (\(key, value) -> key ++ "=" ++ value)
+    <| List.map (\(key, value) -> key ++ "=" ++ Http.uriEncode value)
     <| data
 
 -- Query the elections API
@@ -82,4 +82,4 @@ electionQuery event election =
  where event.id = '""" ++ event ++ """'
   and election.id = '""" ++ election ++ """'
  group by contest.id
- order by contest.name"""
+ order by abs(incumbent.votes - challenging.votes) / cast(incumbent.votes + challenging.votes as float)"""
