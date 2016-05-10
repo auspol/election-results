@@ -24,7 +24,7 @@ view result =
     , case result of
         Err error -> Html.p [] [Html.text error]
         Ok results ->
-            Html.div []
+            Html.div [class "categories"]
             [ electionResults "Coalition"
                 (partyColour Liberal)
                 (\result -> isElected Liberal result || isElected National result)
@@ -57,7 +57,7 @@ electionResults title color condition results =
         case filteredResults of
             [] -> Html.text ""
             filteredResults ->
-                Html.div []
+                Html.div [ class "category" ]
                 [ Html.h2
                     [ style
                         [ ("color", color)
@@ -82,24 +82,13 @@ electionBarCharts electionResults =
         result candidate election = [ (candidate.name, candidate.party, fraction candidate.votes election) ]
         uncounted election = [ ("", "", fraction (uncountedVotes election) election) ]
     in
-        Html.div
-            [ style
-                [ ("display", "flex")
-                , ("flex-wrap", "wrap")
-                ]
-            ]
+        Html.div [ class "election-results" ]
         <| List.map
             (\election -> Html.div
                 [ class "election-result"
                 ]
                 [ Html.p
-                    [ style
-                        [ ("text-align", "center")
-                        , ("font-size", "10px")
-                        , ("margin", "0px")
-                        , ("display", "none")
-                        ]
-                    ]
+                    [ class "electorate" ]
                     [ Html.text election.electorate ]
                 , barChart
                     (result election.incumbent election ++ result election.challenging election)

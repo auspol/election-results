@@ -1,5 +1,26 @@
+.categories {
+
+}
+
+.category {
+
+}
+
+.election-results {
+    display: flex;
+    flex-wrap: wrap;
+}
+
 .election-result {
     flex: 280px 1 0;
+}
+
+.electorate {
+    display: none;
+    margin: 0px;
+
+    font-size: 10px;
+    text-align: center;
 }
 
 @media screen and (min-width: 480px) {
