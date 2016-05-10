@@ -25,17 +25,32 @@ view result =
         Err error -> Html.p [] [Html.text error]
         Ok results ->
             Html.div []
-            [ electionResults "Coalition" (\result -> isElected Liberal result || isElected National result) results
-            , electionResults "Labor" (isElected Labor) results
-            , electionResults "Greens" (isElected Greens) results
-            , electionResults "Other" (isElected Other) results
-            , electionResults "Undecided" isUndecided results
+            [ electionResults "Coalition"
+                (partyColour Liberal)
+                (\result -> isElected Liberal result || isElected National result)
+                results
+            , electionResults "Labor"
+                (partyColour Labor)
+                (isElected Labor)
+                results
+            , electionResults "Greens"
+                (partyColour Greens)
+                (isElected Greens)
+                results
+            , electionResults "Other"
+                (partyColour Other)
+                (isElected Other)
+                results
+            , electionResults "Undecided"
+                "black"
+                isUndecided
+                results
             ]
     ]
 
 -- Results filtered by category
-electionResults : String -> (ElectionResult -> Bool) -> List ElectionResult -> Html
-electionResults title condition results =
+electionResults : String -> String -> (ElectionResult -> Bool) -> List ElectionResult -> Html
+electionResults title color condition results =
     let
         filteredResults = List.filter condition results
     in
@@ -43,7 +58,11 @@ electionResults title condition results =
             [] -> Html.text ""
             filteredResults ->
                 Html.div []
-                [ Html.h2 []
+                [ Html.h2
+                    [ style
+                        [ ("color", color)
+                        ]
+                    ]
                     [ Html.text title
                     , Html.text " ("
                     , Html.text <| toString <| List.length filteredResults

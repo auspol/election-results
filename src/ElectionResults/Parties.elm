@@ -58,4 +58,4 @@ partyColour party =
         National -> "#6666ee"
         Labor    -> "#cc2222"
         Greens   -> "#22cc22"
-        Other    -> "#ccc"
+        Other    -> "#333"
